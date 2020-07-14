@@ -1,6 +1,6 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
-#include "controller.h"
+#include "user_input.h"
 
 
 using namespace std;
@@ -20,8 +20,7 @@ class Game_Demo: public olc::PixelGameEngine
     Game_Demo()
     {
         sAppName = "Demo";
-        playing = 2;
-        setup_controllers(playing);
+
     }
     ~Game_Demo()
     {
@@ -29,7 +28,8 @@ class Game_Demo: public olc::PixelGameEngine
     }
     bool OnUserCreate() override
 	{
-
+        playing = 1;
+        setup_controllers(playing);
         return true;
     }
     bool OnUserUpdate(float fElapsedTime) override
@@ -43,7 +43,7 @@ class Game_Demo: public olc::PixelGameEngine
 				if (controllers[index]->A)
 				{
 
-					//std::cout << index << " player jumps \n";
+					std::cout << index << " player jumps \n";
 				}
 			}
 
