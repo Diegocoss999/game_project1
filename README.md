@@ -30,3 +30,6 @@ linker  :user32 gdi32 opengl32 gdiplus Shlwapi stdc++fs C:\Program Files (x86)\W
     rapid gravity:  
     steal block: random ??  
     
+### contributions 
+    pixelator (http://pixelatorapp.com/)
+    Xbox one Controller Input in C++ with XInput by Minalien (https://www.codeproject.com/articles/26949/xbox-360-controller-input-in-c-with-xinput)
