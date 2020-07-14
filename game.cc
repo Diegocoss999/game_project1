@@ -20,6 +20,8 @@ class Game_Demo: public olc::PixelGameEngine
     Game_Demo()
     {
         sAppName = "Demo";
+        playing = 2;
+        setup_controllers(playing);
     }
     ~Game_Demo()
     {
@@ -27,8 +29,7 @@ class Game_Demo: public olc::PixelGameEngine
     }
     bool OnUserCreate() override
 	{
-        playing = 2;
-        setup_controllers(playing);
+
         return true;
     }
     bool OnUserUpdate(float fElapsedTime) override
@@ -42,13 +43,14 @@ class Game_Demo: public olc::PixelGameEngine
 				if (controllers[index]->A)
 				{
 
-					std::cout << index << " player jumps \n";
+					//std::cout << index << " player jumps \n";
 				}
 			}
 
 		}
 		else
 		{
+		    //pause game
 			std::cout << "reconnect controller";
 		}
 		clean_controller_input(controllers);
@@ -63,6 +65,17 @@ class Game_Demo: public olc::PixelGameEngine
 };
 
 
+int main()
+{
+    cout<<"hello\n";
+	Game_Demo demo;
+	if (demo.Construct( 1920, 1080, 1, 1,false,true))
+		demo.Start();
+    // Game_Demo gd;
+    // gd.Start();
+    cout<<"exit\n";
+	return 0;
+}
 
 
 
@@ -303,14 +316,3 @@ class Game_Demo: public olc::PixelGameEngine
 // };
 
 
-int main()
-{
-    cout<<"hello\n";
-	Game_Demo demo;
-	if (demo.Construct(480, 480, 2, 2))
-		demo.Start();
-    // Game_Demo gd;
-    // gd.Start();
-    cout<<"exit\n";
-	return 0;
-}
