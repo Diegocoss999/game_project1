@@ -1,5 +1,5 @@
 # game_project1
-code: c++
+code: c++  
 description: 2d, tetris clone, single/co-op, with controller support  
 ## road map  
 ## potential features  
@@ -31,5 +31,7 @@ linker  :user32 gdi32 opengl32 gdiplus Shlwapi stdc++fs C:\Program Files (x86)\W
     steal block: random ??  
     
 ## contributions 
-    pixelator (http://pixelatorapp.com/)
+    
+    2d engine and tetris game logic: Javidx9 OneLoneCoder  
     Xbox one Controller Input in C++ with XInput by Minalien (https://www.codeproject.com/articles/26949/xbox-360-controller-input-in-c-with-xinput)
+    pixelator : (http://pixelatorapp.com/)
