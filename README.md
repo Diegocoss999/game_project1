@@ -4,8 +4,11 @@ description: 2d, tetris clone, single/co-op, with controller support
 ## road map  
 ## potential features  
 ### tech requirments
+#### compiling  
 Windows tested (uses XINPUT.h), compiler g++ -std=c++17,   
-linker  :user32 gdi32 opengl32 gdiplus Shlwapi stdc++fs C:\Program Files (x86)\Windows Kits\10 \Lib\10.0.18362.0\um\x64\xinput.lib
+linker  :user32 gdi32 opengl32 gdiplus Shlwapi stdc++fs C:\Program Files (x86)\Windows Kits\10 \Lib\10.0.18362.0\um\x64\xinput.lib 
+#### running exe
+mingw-64 lib's: (in debug folder) 
 ### modes of play  
     single player [classic vs other]  
     single player vs AI  
