@@ -1,21 +1,53 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 #include "user_input.h"
-
-
+#include "tetris.h"
+#include <vector>
+#include <tuple>
 using namespace std;
 // Override base class with your custom functionality
 //data
 
 
 //
+class Game
+{
+private:
+    int max_players = 0;
+    vector<Tetris*> games = {nullptr,nullptr};
+public:
+    Game(int playing)
+    {
+        max_players = playing;
+        for (int index = 0; index < playing; ++index) {
+            games[index] = new Tetris();
+        }
+    }
+    bool update(float fElapsedTime, tuple<vector<olc::HWButton>, vector <xinput_controller*>> t)
+    {
+        for (int index = 0; index < max_players; ++index) {
+            bool up=false,  down=false, left=false, right=false;
+            //controller
+            right = (get<1>(t))[index]->B;
+            left = (get<1>(t))[index]->X;
+            up = (get<1>(t))[index]->Y;
+            down = (get<1>(t))[index]->A;
+            //cout<<(down)? "down":"nope";
+            if (games[index]->update(fElapsedTime,  up,  down,  left,  right))
+                return false;
+        }
+        return true;
+        //games[index].update(float fElapsedTime, bool up, bool down, bool left, bool right);
+    }
 
+};
 
-//game
+//game engine
 class Game_Demo: public olc::PixelGameEngine
 {
     private:
     int playing;
+    Game* g;
     public:
     Game_Demo()
     {
@@ -26,54 +58,101 @@ class Game_Demo: public olc::PixelGameEngine
     {
         clean_controller(playing);
     }
+    //helpers ============
+
+    tuple<vector<olc::HWButton>, vector <xinput_controller*>> get_intput()
+    {
+        vector <xinput_controller*> val = update_controller(playing);
+ 		vector<olc::HWButton> keyboard_buttons = {GetKey(olc::W),GetKey(olc::S),GetKey(olc::D),GetKey(olc::A),GetKey(olc::UP),GetKey(olc::DOWN),GetKey(olc::LEFT),GetKey(olc::RIGHT)};
+        return make_tuple(keyboard_buttons, val);
+
+    }
+    void set_user_input()
+    {
+        setup_controllers(playing); // two players max for now
+
+    }
+    //main=============
     bool OnUserCreate() override
 	{
-        playing = 1;
-        setup_controllers(playing);
+        //playing = 1;
+        //cout<<"how many playing\n";
+        //cin >>playing;
+        set_user_input();
+        g = new Game(1);
         return true;
     }
     bool OnUserUpdate(float fElapsedTime) override
 	{
 
-        auto controllers = update(playing);
-		if (all_players_connected(playing))
-		{
+        bool still_running = g->update(fElapsedTime, get_intput());
+        //display g
+        display_OLC_GAME_ENGINE();
+        return still_running;
+    }
+     void display_OLC_GAME_ENGINE()
+    {
+        Clear(olc::BLACK);
 
-			for (int index = 0; index < playing; ++index) {
-				if (controllers[index]->A)
+		// Display ======================
+		/*
+		// Draw Field
+		for (int x = 0; x < nFieldWidth; x++)
+			for (int y = 0; y < nFieldHeight; y++)
+				screen[(y + 2) * nScreenWidth + (x + 2)] = L" ABCDEFG=#"[pField[y * nFieldWidth + x]];
+
+		// Draw Current Piece
+		for (int px = 0; px < 4; px++)
+			for (int py = 0; py < 4; py++)
+				if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.')
+					screen[(nCurrentY + py + 2) * nScreenWidth + (nCurrentX + px + 2)] = nCurrentPiece + 65;
+		*/
+		//not needed on screen =================
+		/*
+		// Draw next Piece
+		for (int px = 0; px < 4; px++)
+			for (int py = 0; py < 4; py++)
+			{
+				screen[(0 + py + 2) * nScreenWidth + (0 + px + 2 + nFieldWidth)] = L' ';
+				if (tetromino[nNextPiece][Rotate(px, py, 0)] != L'.')
 				{
 
-					std::cout << index << " player jumps \n";
+					screen[(0 + py + 2) * nScreenWidth + (0 + px + 2 + nFieldWidth)] = nNextPiece + 65;
 				}
 			}
+		// Draw Score
+		swprintf_s(&screen[2 * nScreenWidth + nFieldWidth + 6], 16, L"SCORE: %8d", nScore);*/
 
-		}
-		else
+		/*
+		//Animate Line Completion
+		if (!vLines.empty())
 		{
-		    //pause game
-			std::cout << "reconnect controller";
+			// Display Frame (cheekily to draw lines)
+			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+			this_thread::sleep_for(400ms); // Delay a bit
+			for (auto& v : vLines)
+				for (int px = 1; px < nFieldWidth - 1; px++)
+				{
+					for (int py = v; py > 0; py--)
+						pField[py * nFieldWidth + px] = pField[(py - 1) * nFieldWidth + px];
+					pField[px] = 0;
+				}
+			vLines.clear();
 		}
-		clean_controller_input(controllers);
-
-
-
-
-
-
-        return true;
+		// Display Frame
+		*/
+		//WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
     }
 };
 
 
 int main()
 {
-    cout<<"hello\n";
 	Game_Demo demo;
-	if (demo.Construct( 1920, 1080, 1, 1,false,true))
-		demo.Start();
-    // Game_Demo gd;
-    // gd.Start();
-    cout<<"exit\n";
+	if (demo.Construct(480, 320,4,4,false,true )) //1920, 1080, 1, 1,false,true //real-ish
+    {
+        demo.Start();
+    }
 	return 0;
 }
 

@@ -1,284 +1,122 @@
-
-#ifndef __tetris_H__
-#define __tetris_H__
-
-//tetris start
-
-//tetris end
-
-
+#ifndef __TETRIS_H__
+#define __TETRIS_H__
 /*
-modes of play
-    single player (classic vs other)
-    single player vs AI
-    co-op verses
-    co-op campaign ??
-controllers
-    keyboard single
-    keyboard multi
-    controller single       (DONE)
-    controller multi        (DONE)
-look
-    polished
-    graphics/art
-    sound
-Tetris
-    basic game logic (timer, player count, types of blocks)
-    additional features.
+	OneLoneCoder.com - Command Line Tetris
+	"Put Your Money Where Your Mouth Is" - @Javidx9
 
-ideas
-    spring: launches column of blocks into air, thus dispersing them.
-    rotation lock:
-    rapid gravity:
-    steal block: random ??
+	License
+	~~~~~~~
+	Copyright (C) 2018  Javidx9
+	This program comes with ABSOLUTELY NO WARRANTY.
+	This is free software, and you are welcome to redistribute it
+	under certain conditions; See license for details.
+	Original works located at:
+	https://www.github.com/onelonecoder
+	https://www.onelonecoder.com
+	https://www.youtube.com/javidx9
 
+	GNU GPLv3
+	https://github.com/OneLoneCoder/videos/blob/master/LICENSE
+
+	From Javidx9 :)
+	~~~~~~~~~~~~~~~
+	Hello! Ultimately I don't care what you use this for. It's intended to be
+	educational, and perhaps to the oddly minded - a little bit of fun.
+	Please hack this, change it and use it in any way you see fit. You acknowledge
+	that I am not responsible for anything bad that happens as a result of
+	your actions. However this code is protected by GNU GPLv3, see the license in the
+	github repo. This means you must attribute me if you use it. You can view this
+	license here: https://github.com/OneLoneCoder/videos/blob/master/LICENSE
+	Cheers!
+
+	Background
+	~~~~~~~~~~
+	I made a video "8-Bits of advice for new programmers" (https://youtu.be/vVRCJ52g5m4)
+	and suggested that building a tetris clone instead of Dark Sould IV might be a better
+	approach to learning to code. Tetris is nice as it makes you think about algorithms.
+
+	Controls are Arrow keys Left, Right & Down. Use Z to rotate the piece.
+	You score 25pts per tetronimo, and 2^(number of lines)*100 when you get lines.
+
+	Future Modifications
+	~~~~~~~~~~~~~~~~~~~~
+	1) Show next block and line counter
+
+	Author
+	~~~~~~
+	Twitter: @javidx9
+	Blog: www.onelonecoder.com
+
+	Video:
+	~~~~~~
+	https://youtu.be/8OK8_tHeCIA
+
+	Last Updated: 30/03/2017
 */
-
-
-/*
-2d snake game using the engine
-#define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
+#include <iostream>
+#include <vector>
 using namespace std;
-// Override base class with your custom functionality
-struct Body_seg
-{
-	int x;
-	int y;
-};
-struct Player
-{
-	int x = 0;
-	int y = 0;
-	int consumed = 0;
-	int score = 0;
-	olc::Key current_direction = olc::E;
-	vector<Body_seg> body;
-};
 
-struct Food
+#include <stdio.h>
+#include <Windows.h>
+
+
+
+class Tetris
 {
-	int x = 10;
-	int y = 10;
-	bool food = False;
-};
-class IsometricDemo : public olc::PixelGameEngine
-{
+	//int nScreenWidth = 80;			// Console Screen Size X (columns)
+	//int nScreenHeight = 30;			// Console Screen Size Y (rows)
+
+	const int nFieldWidth = 12;
+	const int nFieldHeight = 18;
+	unsigned char* pField = nullptr;
+	wstring tetromino[7] = { {L"..X...X...X...X."}, {L"..X..XX...X....."},{L".....XX..XX....."},{L"..X..XX..X......"},{L".X...XX...X....."},{L".X...X...XX....."},{L"..X...X..XX....."} };
+	//tetromino[0] = { L"..X...X...X...X." }; // Tetronimos 4x4
+	//tetromino[1].append(L"..X..XX...X.....");
+	//tetromino[2].append(L".....XX..XX.....");
+	//tetromino[3].append(L"..X..XX..X......");
+	//tetromino[4].append(L".X...XX...X.....");
+	//tetromino[5].append(L".X...X...XX.....");
+	//tetromino[6].append(L"..X...X..XX.....");
+
+	// Game Logic
+	bool bKey[4];
+	int nNextPiece = rand() % 7;
+	//int nNextNextPiece = 0;	// maybe I don't need
+	int nCurrentPiece = 0;
+	int nCurrentRotation = 0;
+	int nCurrentX = nFieldWidth / 2;
+	int nCurrentY = 0;
+	int nSpeed = 250;
+	int nSpeedCount = 0;
+	bool bForceDown = false;
+	bool bRotateHold = true;
+	int nPieceCount = 0;
+	int nScore = 0;
+	vector<int> vLines;
+	bool bGameOver = false;
+
+	wchar_t* screen;
+	//comment later===============
+	HANDLE hConsole;
+	DWORD dwBytesWritten;
 public:
-	IsometricDemo()
+	Tetris();
+	~Tetris();
+	int Rotate(int px, int py, int r);
+
+	bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY);
+	//void start();
+	bool update(float fElapsedTime, bool up, bool down, bool left, bool right);
+	void close()
 	{
-		sAppName = "Coding Quickie: Isometric Tiles";
-	}
-
-private:
-
-	// Number of tiles in world
-	olc::vi2d vWorldSize = { 14, 10 };
-
-	// Size of single tile graphic
-	olc::vi2d vTileSize = { 20, 20 };
-
-	// Where to place tile (0,0) on screen (in tile size steps)
-	olc::vi2d vOrigin = { 5, 1 };
-
-	// Sprite that holds all imagery
-	olc::Sprite *sprIsom = nullptr;
-	olc::Sprite *sprfood = nullptr;
-	// Pointer to create 2D world array
-	int *pWorld = nullptr;
-	Player player;
-	Food food;
-	double speed =7.0; // squares/sec
-	double x=0;
-	double y=0;
-
-public:
-	bool OnUserCreate() override
-	{
-		// Load sprites used in demonstration
-		sprIsom = new olc::Sprite("resources/square.png");
-		sprfood = new olc::Sprite("resources/food.png");
-		// Create empty world
-		pWorld = new int[vWorldSize.x * vWorldSize.y]{ 0 };
-		return true;
-	}
-
-	bool OnUserUpdate(float fElapsedTime) override
-	{
-
-		Clear(olc::BLACK);
-		auto dir_W = GetKey(olc::A);
-		auto dir_E = GetKey(olc::D);
-		auto dir_S = GetKey(olc::S);
-		auto dir_N = GetKey(olc::W);
-		bool eating = False;
-		//end game
-		if (player.x < 0 || player.y < 0 || player.x >23 || player.y>23)
-		{
-			return false;
-		}
-		//food
-		if (!food.food)
-		{
-			food.x = rand() % 24;
-			food.y = rand() % 24;
-			food.food = True;
-		}
-		int size = player.body.size() ;
-		for (int i = 0; i < size && eating; ++i)
-		{
-			// DrawPartialSprite(player.body[i].x * vTileSize.x,player.body[i].y*vTileSize.y, sprIsom, 0, 0, vTileSize.x, vTileSize.y);
-			if (player.x == player.body[i].x  && player.body[i].y ==player.y)
-			{
-				cout <<player.x <<player.body[i].x  <<"'"<< player.body[i].y <<player.y;
-				return false;
-			}
-		}
-		DrawPartialSprite(food.x* vTileSize.x, food.y*vTileSize.y, sprfood, 0, 0, vTileSize.x, vTileSize.y, 1);
-		if (food.x == player.x && food.y == player.y)
-		{
-			food.food = false;
-			++player.consumed;
-			++player.score;
-			Body_seg s;
-			if (!player.body.empty())
-			{
-			s.x = (*(--player.body.end())).x;
-			s.y = (*--player.body.end()).y;
-			}else
-			{
-				s.x = player.x;
-				s.y = player.y;
-			}
-			eating = True;
-			player.body.push_back(s);
-		}
-
-		if (dir_W.bHeld|| dir_W.bPressed)
-		{
-			// cout << "w";
-			player.current_direction = olc::W;
-			// 	olc::vi2d vCell = { vMouse.x / vTileSize.x, vMouse.y / vTileSize.y };
-		}
-		else if (dir_E.bHeld|| dir_E.bPressed)
-		{
-			// cout << "e";
-			// ++player.x;
-			player.current_direction = olc::E;
-			// 	olc::vi2d vCell = { vMouse.x / vTileSize.x, vMouse.y / vTileSize.y };
-		}
-		else if (dir_S.bHeld|| dir_S.bPressed)
-		{
-			// cout << "s";
-
-			// ++player.y;
-			player.current_direction = olc::S;
-			// 	olc::vi2d vCell = { vMouse.x / vTileSize.x, vMouse.y / vTileSize.y };
-		}
-		else if (dir_N.bHeld|| dir_N.bPressed)
-		{
-			// cout << "n";
-			// --player.y;
-			player.current_direction = olc::N;
-			// 	olc::vi2d vCell = { vMouse.x / vTileSize.x, vMouse.y / vTileSize.y };
-		}
-		int prev_x = player.x;
-		int prev_y = player.y;
-		if (player.current_direction == olc::W)
-		{
-			x = x- (speed*fElapsedTime);
-			player.x = x;
-		}
-		else if (player.current_direction == olc::E)
-		{
-			// cout << "e";
-			x = x + (speed*fElapsedTime);
-			player.x = x;
-		}
-		else if (player.current_direction == olc::S)
-		{
-			// cout << "s";
-			y = y+ (speed*fElapsedTime);
-			player.y = y;
-		}
-		else if (player.current_direction == olc::N)
-		{
-			// cout << "n";
-			y = y - (speed*fElapsedTime);
-			player.y = y;
-		}
-		if (prev_x !=player.x || prev_y !=player.y )
-		{
-			//update
-			DrawPartialSprite(player.x* vTileSize.x, player.y*vTileSize.y, sprIsom, 0, 0, vTileSize.x, vTileSize.y);
-
-			int size = player.body.size() ;
-			// if (size > 0)
-			// {
-			for (int i = 0; i < size ; ++i)
-			{
-				int t1 = player.body[i].x;
-				int t2 = player.body[i].y;
-				player.body[i].x = prev_x;
-				player.body[i].y = prev_y;
-				DrawPartialSprite(player.body[i].x * vTileSize.x,player.body[i].y*vTileSize.y, sprIsom, 0, 0, vTileSize.x, vTileSize.y);
-				prev_x = t1;
-				prev_y = t2;
-			}
-		}
-		else
-		{
-			DrawPartialSprite(player.x* vTileSize.x, player.y*vTileSize.y, sprIsom, 0, 0, vTileSize.x, vTileSize.y);
-
-			int size = player.body.size() ;
-			for (int i = 0; i < size ; ++i)
-			{
-				DrawPartialSprite(player.body[i].x * vTileSize.x,player.body[i].y*vTileSize.y, sprIsom, 0, 0, vTileSize.x, vTileSize.y);
-
-			}
-		}
-
-
-
-		olc::vi2d vMouse = { GetMouseX(), GetMouseY() };
-
-	// 	// Work out active cell
-		olc::vi2d vCell = { vMouse.x / vTileSize.x, vMouse.y / vTileSize.y };
-	// 	// Work out selected cell by transforming screen cell
-		olc::vi2d vSelected =
-		{
-			(vCell.y - vOrigin.y) + (vCell.x - vOrigin.x),
-			(vCell.y - vOrigin.y) - (vCell.x - vOrigin.x)
-		};
-	// 	// Labmda function to convert "world" coordinate into screen space
-		auto ToScreen = [&](int x, int y)
-		{
-			return olc::vi2d
-			{
-				(vOrigin.x * vTileSize.x) + (x - y) * (vTileSize.x / 2),
-				(vOrigin.y * vTileSize.y) + (x + y) * (vTileSize.y / 2)
-			};
-		};
-
-	// 	// Draw Hovered Cell Boundary
-		DrawRect(vCell.x * vTileSize.x, vCell.y * vTileSize.y, vTileSize.x, vTileSize.y, olc::RED);
-
-	// 	// Draw Debug Info
-		// DrawString(4, 4, "Mouse   : " + std::to_string(vMouse.x) + ", " + std::to_string(vMouse.y), olc::WHITE);
-		DrawString(4, 4, "player   : " + std::to_string(player.x) + ", " + std::to_string(player.y), olc::WHITE);
-		DrawString(4, 14, "score    : " + std::to_string(player.consumed) + ", " + std::to_string(player.score), olc::WHITE);
-		// DrawString(4, 24, "Selected: " + std::to_string(vSelected.x) + ", " + std::to_string(vSelected.y), olc::WHITE);
-		return true;
+		// Oh Dear
+		/*CloseHandle(hConsole);*/
+		/*cout << "Game Over!! Score:" << nScore << endl;
+		system("pause");
+		return 0;*/
 	}
 };
 
-
-int main()
-{
-	IsometricDemo demo;
-	if (demo.Construct(480, 480, 2, 2))
-		demo.Start();
-	return 0;
-
-*/
-#endif
+#endif // !__tetris_H__
