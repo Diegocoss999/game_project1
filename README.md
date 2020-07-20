@@ -1,8 +1,10 @@
 # game_project1
 code: c++  
 description: 2d, tetris clone, single/co-op, with controller support  
-## road map  
+## road map   
+polish up tetris, graphics, ui, and implement remaining features.   
 ## potential features  
+Who knows?  
 ### tech requirments
 #### compiling  
 Windows tested (uses XINPUT.h), compiler g++ -std=c++17,   
