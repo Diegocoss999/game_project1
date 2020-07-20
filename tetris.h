@@ -109,6 +109,7 @@ public:
 	bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY);
 	//void start();
 	bool update(float fElapsedTime, bool up, bool down, bool left, bool right);
+
 	void close()
 	{
 		// Oh Dear
@@ -116,6 +117,14 @@ public:
 		/*cout << "Game Over!! Score:" << nScore << endl;
 		system("pause");
 		return 0;*/
+	}
+	wchar_t* get_field()
+	{
+	    return screen;
+	}
+    int get_score()
+	{
+	    return nScore;
 	}
 };
 

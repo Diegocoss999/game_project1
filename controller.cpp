@@ -199,7 +199,7 @@ std::vector <xinput_controller*> update_controller(int max_players)
 					normalizedMagnitude = magnitude / (32767 - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 
 					array[index]->sThumbLX = normalizedLX;
-					array[index]->sThumbLY = normalizedLX;
+					array[index]->sThumbLY = normalizedLY;
 					array[index]->nmagnitude = normalizedMagnitude;
 					array[index]->magnitude = magnitude;
 				}

@@ -4,17 +4,22 @@
 #include "tetris.h"
 #include <vector>
 #include <tuple>
+#include <map>
 using namespace std;
 // Override base class with your custom functionality
 //data
 
 
 //
+int screen_resolution_x = 1080;
+int screen_resolution_y = 1920;
 class Game
 {
 private:
     int max_players = 0;
     vector<Tetris*> games = {nullptr,nullptr};
+
+    //" ABCDEFG=#"[pField[y * nFieldWidth + x]];
 public:
     Game(int playing)
     {
@@ -25,29 +30,56 @@ public:
     }
     bool update(float fElapsedTime, tuple<vector<olc::HWButton>, vector <xinput_controller*>> t)
     {
+        //cout<<"gupdate";
+        vector<olc::HWButton> keyboard =(get<0>(t));
+        //{GetKey(olc::W),GetKey(olc::S),GetKey(olc::A),GetKey(olc::D),GetKey(olc::UP),GetKey(olc::DOWN),GetKey(olc::LEFT),GetKey(olc::RIGHT)};
+        vector <xinput_controller*> controllers = (get<1>(t));
         for (int index = 0; index < max_players; ++index) {
-            bool up=false,  down=false, left=false, right=false;
+            bool z=false,  down=false, left=false, right=false;
             //controller
-            right = (get<1>(t))[index]->B;
-            left = (get<1>(t))[index]->X;
-            up = (get<1>(t))[index]->Y;
-            down = (get<1>(t))[index]->A;
-            //cout<<(down)? "down":"nope";
-            if (games[index]->update(fElapsedTime,  up,  down,  left,  right))
+            //cout << "update";
+            z = (controllers[index]->Y || keyboard[0 + index*4].bPressed)?true:false;
+            down = (controllers[index]->A || keyboard[1+ index*4].bPressed)?true:false;
+            left = (controllers[index]->X || keyboard[2+ index*4].bPressed)?true:false;
+            right = (controllers[index]->B || keyboard[3+ index*4].bPressed)?true:false;
+            //cout << "update";
+            if (games[index]->update(fElapsedTime,  z,  down,  left,  right))
                 return false;
         }
         return true;
         //games[index].update(float fElapsedTime, bool up, bool down, bool left, bool right);
     }
-
+    int get_score(int player)
+    {
+        return games[(player < max_players && player >=0)?player:0]->get_score();
+        /*vector<int> f[playing];
+        for (int index = 0; index < max_players; ++index)
+        {
+            f[index] = games[index].get_field();
+        }
+        return f;*/
+    }
+    vector<wchar_t*> get_fields()
+    {
+        vector<wchar_t*> f;
+        for (int index = 0; index < max_players; ++index)
+        {
+            f.push_back( games[index]->get_field());
+        }
+        return f;
+    }
 };
 
 //game engine
 class Game_Demo: public olc::PixelGameEngine
 {
     private:
-    int playing;
+    int playing ;
     Game* g;
+    map<char,olc::vf2d> tileset_map = {{' ', olc::vf2d(150,150)},{'A', olc::vf2d(0,0)},{'B', olc::vf2d(30,0)},{'C', olc::vf2d(60,0)},{'D', olc::vf2d(0,30)},{'E', olc::vf2d(30,30)},{'F', olc::vf2d(60,30)},{'G', olc::vf2d(0,60)},{'=', olc::vf2d(30,60)},{'#', olc::vf2d(60,60)}};
+    //graphix
+    olc::Sprite *a1,*a2,*a3,*a4,*tileset;
+    olc::Decal *tileset_d;
     public:
     Game_Demo()
     {
@@ -62,8 +94,11 @@ class Game_Demo: public olc::PixelGameEngine
 
     tuple<vector<olc::HWButton>, vector <xinput_controller*>> get_intput()
     {
+        //cout<<"gd_input";
         vector <xinput_controller*> val = update_controller(playing);
- 		vector<olc::HWButton> keyboard_buttons = {GetKey(olc::W),GetKey(olc::S),GetKey(olc::D),GetKey(olc::A),GetKey(olc::UP),GetKey(olc::DOWN),GetKey(olc::LEFT),GetKey(olc::RIGHT)};
+        //cout<<"error";
+ 		vector<olc::HWButton> keyboard_buttons = {GetKey(olc::W),GetKey(olc::S),GetKey(olc::A),GetKey(olc::D),GetKey(olc::UP),GetKey(olc::DOWN),GetKey(olc::LEFT),GetKey(olc::RIGHT)};
+        //cout<<"gd_input_end";
         return make_tuple(keyboard_buttons, val);
 
     }
@@ -75,17 +110,25 @@ class Game_Demo: public olc::PixelGameEngine
     //main=============
     bool OnUserCreate() override
 	{
-        //playing = 1;
-        //cout<<"how many playing\n";
-        //cin >>playing;
+ 		/*
+ 		a1 = new olc::Sprite("resources/pixel_art1.png");
+ 		a2 = new olc::Sprite("resources/pixel_art2.png");
+ 		a3 = new olc::Sprite("resources/pixel_art3.png");
+ 		a4 = new olc::Sprite("resources/pixel_art4.png");
+ 		*/
+ 		playing = 1;
+ 		tileset = new olc::Sprite("resources/tileset.png");
+ 		tileset_d = new olc::Decal(tileset);
         set_user_input();
-        g = new Game(1);
+
+        g = new Game(playing);
         return true;
     }
     bool OnUserUpdate(float fElapsedTime) override
 	{
-
+        //cout<<"gupdate";
         bool still_running = g->update(fElapsedTime, get_intput());
+        //cout<<"update";
         //display g
         display_OLC_GAME_ENGINE();
         return still_running;
@@ -93,6 +136,63 @@ class Game_Demo: public olc::PixelGameEngine
      void display_OLC_GAME_ENGINE()
     {
         Clear(olc::BLACK);
+        //DrawSprite(0, 0, tileset,  2);
+        //olc::vf2d pos = olc::vf2d(0,0);
+        //olc::vf2d tileset_pos =olc::vf2d(0,0);
+        olc::vf2d tileset_size = olc::vf2d(30,30);
+        //DrawPartialDecal(pos, tileset_d, tileset_pos,tileset_size);
+        int block_size = 30;
+        /*
+        for (int y = 0; y < screen_resolution_y/block_size; ++y)
+        {
+            for (int x = 0; x < screen_resolution_x/block_size; ++x)
+            {
+
+                olc::vf2d pos = olc::vf2d(y*block_size,x*block_size);
+                //DrawPartialDecal(pos, tileset_d, tileset_pos,tileset_size);
+            }
+        }
+        */
+        {
+            auto fs = g->get_fields();
+            auto f = fs[0];
+            //cout<<f;
+            //cout<<"nope";
+            for (int y = 0; y < 18; ++y)//screen_resolution_y/block_size
+            {
+                for (int x = 0; x < 12; ++x)
+                {
+                    //char wchar_t wide = f[y*18 + x];
+                    char character = (f[y*12 + x] >= 0 && f[y*12 + x] < 256 )? static_cast<char>(f[y*12 + x]): ' ';
+
+                    olc::vf2d pos = olc::vf2d(x*block_size+100,y*block_size+150);
+                    DrawPartialDecal(pos, tileset_d, tileset_map[character],tileset_size);
+                }
+            }
+        }
+        //cout<<"error";
+        if (playing == 2)
+        {
+            auto fs = g->get_fields();
+            //cout<< "nope";
+            auto f = fs[1];
+            //cout<<f;
+            //cout<<"nope";
+            for (int y = 0; y < 18; ++y)//screen_resolution_y/block_size
+            {
+                for (int x = 0; x < 12; ++x)
+                {
+                    //char wchar_t wide = f[y*18 + x];
+                    char character = (f[y*12 + x] >= 0 && f[y*12 + x] < 256 )? static_cast<char>(f[y*12 + x]): ' ';
+
+                    olc::vf2d pos = olc::vf2d(x*block_size+500,y*block_size+150);
+
+
+
+                    DrawPartialDecal(pos, tileset_d, tileset_map[character],tileset_size);
+                }
+            }
+        }
 
 		// Display ======================
 		/*
@@ -142,6 +242,7 @@ class Game_Demo: public olc::PixelGameEngine
 		// Display Frame
 		*/
 		//WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
+		DrawString(4, 14, "score    : " + std::to_string(g->get_score(0)) + ", " + std::to_string(g->get_score(1)), olc::WHITE, 5);
     }
 };
 
@@ -149,7 +250,7 @@ class Game_Demo: public olc::PixelGameEngine
 int main()
 {
 	Game_Demo demo;
-	if (demo.Construct(480, 320,4,4,false,true )) //1920, 1080, 1, 1,false,true //real-ish
+	if (demo.Construct( screen_resolution_y, screen_resolution_x, 1,1,false, false )) //1920, 1080, 1, 1,false,true //real-ish//480, 320,4,4,false,true//1280, 720,4,4,false,true
     {
         demo.Start();
     }
@@ -230,10 +331,6 @@ int main()
 // 	{
 
 // 		Clear(olc::BLACK);
-// 		auto dir_W = GetKey(olc::A);
-// 		auto dir_E = GetKey(olc::D);
-// 		auto dir_S = GetKey(olc::S);
-// 		auto dir_N = GetKey(olc::W);
 // 		bool eating = False;
 // 		//end game
 // 		if (player.x < 0 || player.y < 0 || player.x >23 || player.y>23)

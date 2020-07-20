@@ -5,6 +5,7 @@
 Tetris::Tetris()
 {
     pField = new unsigned char[nFieldWidth * nFieldHeight]; // Create play field buffer
+    screen = new wchar_t[nFieldWidth * nFieldHeight];
     for (int x = 0; x < nFieldWidth; x++) // Board Boundary
         for (int y = 0; y < nFieldHeight; y++)
             pField[y * nFieldWidth + x] = (x == 0 || x == nFieldWidth - 1 || y == nFieldHeight - 1) ? 9 : 0;
@@ -74,6 +75,7 @@ bool Tetris::DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY)
 bool Tetris::update(float fElapsedTime, bool up, bool down, bool left, bool right)
 	{
 		// Timing =======================
+
 		//this_thread::sleep_for(10ms); // Small Step = 1 Game Tick
 		nSpeedCount++;
 		bForceDown = (nSpeedCount == nSpeed);
@@ -152,18 +154,20 @@ bool Tetris::update(float fElapsedTime, bool up, bool down, bool left, bool righ
 		}
 
 		// Display ======================
-		/*
+//cout<<"please";
 		// Draw Field
 		for (int x = 0; x < nFieldWidth; x++)
 			for (int y = 0; y < nFieldHeight; y++)
-				screen[(y + 2) * nScreenWidth + (x + 2)] = L" ABCDEFG=#"[pField[y * nFieldWidth + x]];
-
+				screen[(y*nFieldWidth )  + (x )] = L" ABCDEFG=#"[pField[y * nFieldWidth + x]];
+        //	screen[(y + 2) * nScreenWidth + (x + 2)] = L" ABCDEFG=#"[pField[y * nFieldWidth + x]];
+//cout<<"please";
 		// Draw Current Piece
 		for (int px = 0; px < 4; px++)
 			for (int py = 0; py < 4; py++)
 				if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.')
-					screen[(nCurrentY + py + 2) * nScreenWidth + (nCurrentX + px + 2)] = nCurrentPiece + 65;
-		*/
+					screen[(nCurrentY + py ) * nFieldWidth + (nCurrentX + px )] = nCurrentPiece + 65;
+		//			screen[(nCurrentY + py + 2) * nScreenWidth + (nCurrentX + px + 2)] = nCurrentPiece + 65;
+        //cout<<"please";
 		//not needed on screen =================
 		/*
 		// Draw next Piece
@@ -180,13 +184,14 @@ bool Tetris::update(float fElapsedTime, bool up, bool down, bool left, bool righ
 		// Draw Score
 		swprintf_s(&screen[2 * nScreenWidth + nFieldWidth + 6], 16, L"SCORE: %8d", nScore);*/
 
-		/*
+
 		//Animate Line Completion
 		if (!vLines.empty())
 		{
+		    /*
 			// Display Frame (cheekily to draw lines)
 			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
-			this_thread::sleep_for(400ms); // Delay a bit
+			this_thread::sleep_for(400ms); // Delay a bit*/
 			for (auto& v : vLines)
 				for (int px = 1; px < nFieldWidth - 1; px++)
 				{
@@ -197,7 +202,7 @@ bool Tetris::update(float fElapsedTime, bool up, bool down, bool left, bool righ
 			vLines.clear();
 		}
 		// Display Frame
-		*/
+
 		//WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 
 
